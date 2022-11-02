@@ -1,1 +1,4 @@
 # go-ass4
+## Warm up exercise
+1. Single process: Imagine, that you have a function  setLeader, that is a critical section, so you want to make sure that only one go-routine can call it at the same time. Discuss how to implement mutual exclusion in Golang - what  language constructions can be used?  Code an example, and discuss with your group. How can you document, that mutual exclusion is working correctly inside a single golang process?
+2. Distributed: Now, create a grpc service hat only lets one process enter the critical section  setLeader at the same time. You have to implement distributed mutual exclusion - what algorithm can you use? Code an example, and discuss with your group. How can you document, that distributed mutual exclusion is working correctly across several golang processes? Can you demonstrate this with 3 nodes?
