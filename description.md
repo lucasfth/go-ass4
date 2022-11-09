@@ -1,5 +1,5 @@
 ## Helpfull links
-Nadja peer to perr [repo](https://github.com/NaddiNadja/peer-to-peer)
+Nadja peer to peer [repo](https://github.com/NaddiNadja/peer-to-peer)
 
 ## Description:
 
