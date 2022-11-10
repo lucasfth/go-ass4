@@ -1,22 +1,23 @@
 package main
 
 import (
+	request "Lucasfth/go-ass4/grpc/grpc"
 	"context"
-	request "github.com/Lucasfth/peer-to-peer/grpc"
-	
 )
 
-func main(){
+func main() {
 
 }
 
-type peer struct{
+type peer struct {
 	request.UnimplementedRequestServiceServer
-	id int32
+	id              int32
 	amountOfRequest int32
-	
+	peers           map[int32]request.RequestServiceClient
+	ctx             context.Context
 }
 
-func (p *peer) request(ctx context.Context)(){
-	
+func (p *peer) request(ctx context.Context, req *request.Request) (*request.Request, error) {
+	id := req.Id
+	amount := req.RequestAmount
 }
