@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc"
 )
 func main() {
+	log.SetFlags(log.Lmicroseconds)
 	arg1, _ := strconv.ParseInt(os.Args[1], 10, 32)
 	ownPort := int32(arg1) + 5000
 
@@ -22,6 +23,7 @@ func main() {
 	p := &peer{
 		id:            ownPort,
 		requestAmount: 0,
+		isPiloting:    false,
 		peers:         make(map[int32]request.RequestServiceClient),
 		ctx:           ctx,
 	}
@@ -60,10 +62,14 @@ func main() {
 
 	//scanner := bufio.NewScanner(os.Stdin)
 	for  {
-		responses := p.sendRequestToAll()
+		responses, shouldTry := p.sendRequestToAll()
 
-		for i := 0; i < 3; i++ {
-			if  i == 2 {
+		if !shouldTry{
+			continue
+		}
+
+		for i := 0; i < 4; i++ {
+			if  i == 3 {
 				p.criticalSection()
 				p.requestAmount = 0
 			}
@@ -72,9 +78,9 @@ func main() {
 				continue
 			}
 			if (responses[int32(i) + 5001] > p.requestAmount) {
-				continue
+				break
 			} else if (responses[int32(i) + 5001] == p.requestAmount && int32(i) + 5001 > p.id) {
-				continue
+				break
 			}
 		}
 	}
@@ -84,6 +90,7 @@ type peer struct {
 	request.UnimplementedRequestServiceServer
 	id            int32
 	requestAmount int32
+	isPiloting	  bool
 	peers         map[int32]request.RequestServiceClient
 	ctx           context.Context
 }
@@ -92,11 +99,11 @@ func (p *peer) Request(ctx context.Context, req *request.Request) (*request.Repl
 	id := req.Id
 	reqAmount := p.requestAmount
 	
-	rep := &request.Reply{Id: id, RequestAmount: reqAmount}
+	rep := &request.Reply{Id: id, RequestAmount: reqAmount, IsPiloting: p.isPiloting}
 	return rep, nil
 }
 
-func (p *peer) sendRequestToAll() (map[int32]int32){
+func (p *peer) sendRequestToAll() (map[int32]int32 , bool){
 	response := make(map[int32]int32)
 	p.requestAmount++
 	request := &request.Request{Id: p.id, RequestAmount: p.requestAmount}
@@ -105,15 +112,22 @@ func (p *peer) sendRequestToAll() (map[int32]int32){
 		if err != nil {
 			log.Fatalf("Could not send request: %v", err)
 		}
-		log.Printf("Got reply from id %v: %v\n", id, reply.RequestAmount)
+		log.Printf("Got reply from id %v: %v: %v\n", id, reply.RequestAmount, reply.IsPiloting)
+		if reply.IsPiloting {
+			time.Sleep(2 * time.Second)
+			return make(map[int32]int32) , false
+		}
 		response[reply.Id] = reply.RequestAmount
 	}
-	return response
+	return response , true
 	
 }
 
 func (p *peer) criticalSection() {
-	log.Printf("%v is now pilot -------", p.id)
-	time.Sleep(5 * time.Second)
-	log.Printf("%v has given away control", p.id)
+	p.isPiloting = true
+	log.Printf("%v is now pilot 	-----------------------", p.id)
+	time.Sleep(4 * time.Second)
+	log.Printf("%v it not pilot 	-----------", p.id)
+	p.isPiloting = false
+	time.Sleep(2 * time.Second)
 }
