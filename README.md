@@ -19,4 +19,20 @@ go run main.go 3
 This will start three peers. They will start to discuss internally which peer should get control of the plane.
 
 ## Good to know
+### User Id / Port name
 The numbers used as args when starting "main" are interpreted as port numbers. Thus, in the system logs, you will not see the id that has been given but the port number instead. The port number is calculated by adding the id and 5000.
+
+### System log
+When a peer request control of plane the reply it will get back will get in the form:
+```bash
+<time (HH:mm:ss:SSSSSS)> Got reply from id <id> : <request amount> : <is pilot>
+```
+When a peer is the pilot the log will be in the form:
+```bash
+<time (HH:mm:ss:SSSSSS)><id> is now pilot 	-----------------------
+```
+When they stop being the pilot the log will be in the form:
+```bash
+<time (HH:mm:ss:SSSSSS)><id> is not pilot 	-----------
+```
+
