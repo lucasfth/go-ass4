@@ -23,9 +23,9 @@ Technical Requirements:
 2. Provide a README.md, that explains how to start your system
 3. Use gRPC for message passing between nodes
 4. Your nodes need to find each other.  For service discovery, you can choose one of the following options
-  1. Supply a file with IP addresses/ports of other nodes
-  2. Enter IP address/ports through the command line 
-  3. Use a package for service discovery, like the [Serf package](https://github.com/hashicorp/serf)
+   1.  Supply a file with IP addresses/ports of other nodes
+   2.  Enter IP address/ports through the command line 
+   3.  Use a package for service discovery, like the [Serf package](https://github.com/hashicorp/serf)
 5. Demonstrate that the system can be started with at least 3 nodes
 6. Demonstrate using your system's logs,  a sequence of messages in the system, that leads to a node getting access to the Critical Section. You should provide a discussion of your algorithm, using examples from your logs.
 
