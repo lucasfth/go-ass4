@@ -127,7 +127,7 @@ func (p *peer) criticalSection() {
 	p.isPiloting = true
 	log.Printf("%v is now pilot 	-----------------------", p.id)
 	time.Sleep(4 * time.Second)
-	log.Printf("%v it not pilot 	-----------", p.id)
+	log.Printf("%v is not pilot 	-----------", p.id)
 	p.isPiloting = false
 	time.Sleep(2 * time.Second)
 }
