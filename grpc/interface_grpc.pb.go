@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RequestServiceClient interface {
-	Request(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Request, error)
+	Request(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Reply, error)
 }
 
 type requestServiceClient struct {
@@ -33,8 +33,8 @@ func NewRequestServiceClient(cc grpc.ClientConnInterface) RequestServiceClient {
 	return &requestServiceClient{cc}
 }
 
-func (c *requestServiceClient) Request(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Request, error) {
-	out := new(Request)
+func (c *requestServiceClient) Request(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Reply, error) {
+	out := new(Reply)
 	err := c.cc.Invoke(ctx, "/request.RequestService/request", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -46,7 +46,7 @@ func (c *requestServiceClient) Request(ctx context.Context, in *Request, opts ..
 // All implementations must embed UnimplementedRequestServiceServer
 // for forward compatibility
 type RequestServiceServer interface {
-	Request(context.Context, *Request) (*Request, error)
+	Request(context.Context, *Request) (*Reply, error)
 	mustEmbedUnimplementedRequestServiceServer()
 }
 
@@ -54,7 +54,7 @@ type RequestServiceServer interface {
 type UnimplementedRequestServiceServer struct {
 }
 
-func (UnimplementedRequestServiceServer) Request(context.Context, *Request) (*Request, error) {
+func (UnimplementedRequestServiceServer) Request(context.Context, *Request) (*Reply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Request not implemented")
 }
 func (UnimplementedRequestServiceServer) mustEmbedUnimplementedRequestServiceServer() {}
@@ -98,92 +98,6 @@ var RequestService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "request",
 			Handler:    _RequestService_Request_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "grpc/interface.proto",
-}
-
-// JoinServiceClient is the client API for JoinService service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type JoinServiceClient interface {
-	Join(ctx context.Context, in *Join, opts ...grpc.CallOption) (*Join, error)
-}
-
-type joinServiceClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewJoinServiceClient(cc grpc.ClientConnInterface) JoinServiceClient {
-	return &joinServiceClient{cc}
-}
-
-func (c *joinServiceClient) Join(ctx context.Context, in *Join, opts ...grpc.CallOption) (*Join, error) {
-	out := new(Join)
-	err := c.cc.Invoke(ctx, "/request.JoinService/join", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// JoinServiceServer is the server API for JoinService service.
-// All implementations must embed UnimplementedJoinServiceServer
-// for forward compatibility
-type JoinServiceServer interface {
-	Join(context.Context, *Join) (*Join, error)
-	mustEmbedUnimplementedJoinServiceServer()
-}
-
-// UnimplementedJoinServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedJoinServiceServer struct {
-}
-
-func (UnimplementedJoinServiceServer) Join(context.Context, *Join) (*Join, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Join not implemented")
-}
-func (UnimplementedJoinServiceServer) mustEmbedUnimplementedJoinServiceServer() {}
-
-// UnsafeJoinServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to JoinServiceServer will
-// result in compilation errors.
-type UnsafeJoinServiceServer interface {
-	mustEmbedUnimplementedJoinServiceServer()
-}
-
-func RegisterJoinServiceServer(s grpc.ServiceRegistrar, srv JoinServiceServer) {
-	s.RegisterService(&JoinService_ServiceDesc, srv)
-}
-
-func _JoinService_Join_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Join)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(JoinServiceServer).Join(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/request.JoinService/join",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(JoinServiceServer).Join(ctx, req.(*Join))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// JoinService_ServiceDesc is the grpc.ServiceDesc for JoinService service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var JoinService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "request.JoinService",
-	HandlerType: (*JoinServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "join",
-			Handler:    _JoinService_Join_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

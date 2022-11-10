@@ -5,18 +5,15 @@ package request;
 option go_package = "https://github.com/Lucasfth/go-ass4;request";
 
 service RequestService{
-    rpc request (Request) returns (Request) {}
-}
-
-service JoinService{
-    rpc join (Join) returns (Join){}
-}
+    rpc request (Request) returns (Reply) {}
+} 
 
 message Request {
     int32 id = 1;
     int32 requestAmount = 2;
 }
 
-message Join {
+message Reply {
     int32 id = 1;
+    int32 requestAmount = 2;
 }
