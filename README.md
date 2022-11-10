@@ -8,11 +8,11 @@ To run go-ass4 first start client 1:
 ```bash
 go run main.go 1
 ```
-Then start client 2:
+Then start client 2 in another terminal:
 ```bash
 go run main.go 2
 ```
-Then start client 3:
+Then start client 3 in another terminal:
 ```bash
 go run main.go 3
 ```
