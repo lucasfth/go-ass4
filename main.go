@@ -2,13 +2,13 @@ package main
 
 import (
 	request "Lucasfth/go-ass4/grpc/grpc"
-	"bufio"
 	"context"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	"strconv"
+	"time"
 
 	"google.golang.org/grpc"
 )
@@ -23,7 +23,6 @@ func main() {
 		id:            ownPort,
 		requestAmount: 0,
 		peers:         make(map[int32]request.RequestServiceClient),
-		response:      make(map[int32]int32),
 		ctx:           ctx,
 	}
 
@@ -42,7 +41,7 @@ func main() {
 	}()
 
 	for i := 0; i < 3; i++ {
-		port := int32(5000) + int32(i)
+		port := int32(5000) + int32(i + 1)
 
 		if port == ownPort {
 			continue
@@ -59,20 +58,23 @@ func main() {
 		p.peers[port] = c
 	}
 
-	scanner := bufio.NewScanner(os.Stdin)
-	for scanner.Scan() {
-		p.sendRequestToAll()
-		numberOfPeers := len(p.response)
+	//scanner := bufio.NewScanner(os.Stdin)
+	for  {
+		responses := p.sendRequestToAll()
 
-		for i := 0; i < numberOfPeers; i++ {
-			if p.response[int32(i)] == 0 {
-				break
+		for i := 0; i < 3; i++ {
+			if  i == 2 {
+				p.criticalSection()
+				p.requestAmount = 0
 			}
-			if numberOfPeers == i {
-				if p.decideControl() {
-					p.criticalSection()
-				}
-				p.clearResonse()
+
+			if (int32(i) + 5001 == p.id) {
+				continue
+			}
+			if (responses[int32(i) + 5001] > p.requestAmount) {
+				continue
+			} else if (responses[int32(i) + 5001] == p.requestAmount && int32(i) + 5001 > p.id) {
+				continue
 			}
 		}
 	}
@@ -83,50 +85,35 @@ type peer struct {
 	id            int32
 	requestAmount int32
 	peers         map[int32]request.RequestServiceClient
-	response      map[int32]int32
 	ctx           context.Context
 }
 
 func (p *peer) Request(ctx context.Context, req *request.Request) (*request.Reply, error) {
-	p.requestAmount++
-
-	rep := &request.Reply{Id: p.id, RequestAmount: p.requestAmount}
+	id := req.Id
+	reqAmount := p.requestAmount
+	
+	rep := &request.Reply{Id: id, RequestAmount: reqAmount}
 	return rep, nil
 }
 
-func (p *peer) sendRequestToAll() {
+func (p *peer) sendRequestToAll() (map[int32]int32){
+	response := make(map[int32]int32)
+	p.requestAmount++
 	request := &request.Request{Id: p.id, RequestAmount: p.requestAmount}
-	for _, peer := range p.peers {
+	for id, peer := range p.peers {
 		reply, err := peer.Request(p.ctx, request)
 		if err != nil {
 			log.Fatalf("Could not send request: %v", err)
 		}
-		log.Printf("Got reply from id %v: %v\n", p.id, reply.RequestAmount)
-		p.response[reply.Id] = reply.RequestAmount
+		log.Printf("Got reply from id %v: %v\n", id, reply.RequestAmount)
+		response[reply.Id] = reply.RequestAmount
 	}
+	return response
+	
 }
 
 func (p *peer) criticalSection() {
-	log.Printf("%v is now pilot", p.id)
-}
-
-func (p *peer) decideControl() bool {
-	numberOfPeers := len(p.response)
-	for i := 0; i < numberOfPeers; i++ {
-		if p.response[int32(i)] > p.requestAmount {
-			return false
-		} else if p.response[int32(i+1)] == p.requestAmount {
-			if p.id < int32(i+1) {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-func (p *peer) clearResonse() {
-	numberOfPeers := len(p.response)
-	for i := 0; i < numberOfPeers; i++ {
-		p.response[int32(i)] = 0
-	}
+	log.Printf("%v is now pilot -------", p.id)
+	time.Sleep(5 * time.Second)
+	log.Printf("%v has given away control", p.id)
 }
