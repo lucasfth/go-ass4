@@ -41,5 +41,5 @@ locked
 ```
 When they have either succeeded or failed the log will be in the form:
 ```bash
-unlocked
+unlock
 ```
