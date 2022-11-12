@@ -25,14 +25,14 @@ The numbers used as args when starting "main" are interpreted as port numbers. T
 ### System log
 When a peer request control of plane the reply it will get back will get in the form:
 ```bash
-<time (HH:mm:ss:SSSSSS)> Got reply from id <id> : <request amount> : <is pilot>
+<time (HH:mm:ss.SSSSSS)> Got reply from id <id> : <request amount> : <is pilot>
 ```
 When a peer is the pilot the log will be in the form:
 ```bash
-<time (HH:mm:ss:SSSSSS)><id> is now pilot 	-----------------------
+<time (HH:mm:ss.SSSSSS)><id> is now pilot 	-----------------------
 ```
 When they stop being the pilot the log will be in the form:
 ```bash
-<time (HH:mm:ss:SSSSSS)><id> is not pilot 	-----------
+<time (HH:mm:ss.SSSSSS)><id> is not pilot 	-----------
 ```
 
