@@ -37,9 +37,9 @@ When they stop being the pilot the log will be in the form:
 ```
 When they are starting to try to take control of the plane, the log will be in the form:
 ```bash
-lock
+locked
 ```
 When they have either succeeded or failed the log will be in the form:
 ```bash
-unlock
+unlocked
 ```
