@@ -8,10 +8,12 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 
 	"google.golang.org/grpc"
 )
+
 func main() {
 	log.SetFlags(log.Lmicroseconds)
 	arg1, _ := strconv.ParseInt(os.Args[1], 10, 32)
@@ -43,7 +45,7 @@ func main() {
 	}()
 
 	for i := 0; i < 3; i++ {
-		port := int32(5000) + int32(i + 1)
+		port := int32(5000) + int32(i+1)
 
 		if port == ownPort {
 			continue
@@ -61,25 +63,30 @@ func main() {
 	}
 
 	//scanner := bufio.NewScanner(os.Stdin)
-	for  {
+	for {
 		responses, shouldTry := p.sendRequestToAll()
 
-		if !shouldTry{
+		if !shouldTry {
 			continue
 		}
 
 		for i := 0; i < 4; i++ {
-			if  i == 3 {
+			if i == 3 {
 				p.criticalSection()
 				p.requestAmount = 0
+				break
 			}
 
-			if (int32(i) + 5001 == p.id) {
+			if int32(i)+5001 == p.id {
 				continue
 			}
-			if (responses[int32(i) + 5001] > p.requestAmount) {
+			if responses[int32(i)+5001] > p.requestAmount {
+				p.mutex.Unlock()
+				log.Printf("unlocked")
 				break
-			} else if (responses[int32(i) + 5001] == p.requestAmount && int32(i) + 5001 > p.id) {
+			} else if responses[int32(i)+5001] == p.requestAmount && int32(i)+5001 > p.id {
+				p.mutex.Unlock()
+				log.Printf("unlocked")
 				break
 			}
 		}
@@ -88,9 +95,10 @@ func main() {
 
 type peer struct {
 	request.UnimplementedRequestServiceServer
+	mutex         sync.Mutex
 	id            int32
 	requestAmount int32
-	isPiloting	  bool
+	isPiloting    bool
 	peers         map[int32]request.RequestServiceClient
 	ctx           context.Context
 }
@@ -98,14 +106,18 @@ type peer struct {
 func (p *peer) Request(ctx context.Context, req *request.Request) (*request.Reply, error) {
 	id := req.Id
 	reqAmount := p.requestAmount
-	
+
 	rep := &request.Reply{Id: id, RequestAmount: reqAmount, IsPiloting: p.isPiloting}
 	return rep, nil
 }
 
-func (p *peer) sendRequestToAll() (map[int32]int32 , bool){
+func (p *peer) sendRequestToAll() (map[int32]int32, bool) {
 	response := make(map[int32]int32)
 	p.requestAmount++
+	
+	p.mutex.Lock()
+	log.Printf("locked")
+
 	request := &request.Request{Id: p.id, RequestAmount: p.requestAmount}
 	for id, peer := range p.peers {
 		reply, err := peer.Request(p.ctx, request)
@@ -114,13 +126,15 @@ func (p *peer) sendRequestToAll() (map[int32]int32 , bool){
 		}
 		log.Printf("Got reply from id %v: %v: %v\n", id, reply.RequestAmount, reply.IsPiloting)
 		if reply.IsPiloting {
+			p.mutex.Unlock()
+			log.Printf("unlock")
 			time.Sleep(2 * time.Second)
-			return make(map[int32]int32) , false
+			return make(map[int32]int32), false
 		}
 		response[reply.Id] = reply.RequestAmount
 	}
-	return response , true
-	
+	return response, true
+
 }
 
 func (p *peer) criticalSection() {
@@ -129,5 +143,7 @@ func (p *peer) criticalSection() {
 	time.Sleep(4 * time.Second)
 	log.Printf("%v is not pilot 	-----------", p.id)
 	p.isPiloting = false
+	p.mutex.Unlock()
+	log.Printf("unlocked")
 	time.Sleep(2 * time.Second)
 }
