@@ -35,4 +35,11 @@ When they stop being the pilot the log will be in the form:
 ```bash
 <time (HH:mm:ss.SSSSSS)><id> is not pilot 	-----------
 ```
-
+When they are starting to try to take control of the plane, the log will be in the form:
+```bash
+locked
+```
+When they have either succeeded or failed the log will be in the form:
+```bash
+unlock
+```
