@@ -1,7 +1,7 @@
 # go-ass4
 ## About
 go-ass4 is only capable of running with three peers. No more and no less.
-The critical section has been interpreted as having control of a plane. Thus only a single person has the control of the plane at a signle point in time.
+The critical section has been interpreted as having control of a plane. Thus only a single person has the control of the plane at a single point in time.
 
 ## How to run
 To run go-ass4 first start client 1:
