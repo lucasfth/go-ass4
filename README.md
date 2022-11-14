@@ -29,11 +29,11 @@ When a peer request control of plane the reply it will get back will get in the 
 ```
 When a peer is the pilot the log will be in the form:
 ```bash
-<time (HH:mm:ss.SSSSSS)><id> is now pilot 	-----------------------
+<time (HH:mm:ss.SSSSSS)> <id> is now pilot 	-----------------------
 ```
 When they stop being the pilot the log will be in the form:
 ```bash
-<time (HH:mm:ss.SSSSSS)><id> is not pilot 	-----------
+<time (HH:mm:ss.SSSSSS)> <id> is not pilot 	-----------
 ```
 When they are starting to try to take control of the plane, the log will be in the form:
 ```bash
